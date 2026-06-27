@@ -93,7 +93,7 @@ export default function Index() {
     <div className="flex min-h-screen flex-col items-center justify-center bg-background px-6 py-12">
       <div className="flex flex-col items-center gap-10 sm:gap-14">
         <h1 className="text-center text-4xl font-extrabold tracking-tight text-foreground sm:text-5xl md:text-6xl">
-          We Will Talk And then...
+          We Will Talk.  
         </h1>
         <Countdown />
         <p className="text-center text-sm text-muted-foreground sm:text-base">
