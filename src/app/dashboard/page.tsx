@@ -47,12 +47,14 @@ function formatValue(value: unknown) {
 
 export default function DashboardPage() {
   const [visitors, setVisitors] = useState<Array<Record<string, unknown>>>([]);
-  const [ipGroups, setIpGroups] = useState<Array<{
-    ip: string;
-    count: number;
-    latestVisit: string;
-    url: string;
-  }>>([]);
+  const [ipGroups, setIpGroups] = useState<
+    Array<{
+      ip: string;
+      count: number;
+      latestVisit: string;
+      url: string;
+    }>
+  >([]);
   const [dbError, setDbError] = useState<string | null>(null);
   const [expandedIp, setExpandedIp] = useState<string | null>(null);
 
@@ -75,7 +77,11 @@ export default function DashboardPage() {
 
         for (const visitor of records) {
           const ip = typeof visitor.ip === "string" ? visitor.ip : "unknown";
-          const current = grouped.get(ip) ?? { count: 0, latestVisit: "", url: "" };
+          const current = grouped.get(ip) ?? {
+            count: 0,
+            latestVisit: "",
+            url: "",
+          };
           current.count += 1;
           const receivedAt =
             typeof visitor.receivedAt === "string" ? visitor.receivedAt : "";
@@ -100,7 +106,11 @@ export default function DashboardPage() {
       })
       .catch((error) => {
         if (!active) return;
-        setDbError(error instanceof Error ? error.message : "Failed to load visitor data");
+        setDbError(
+          error instanceof Error
+            ? error.message
+            : "Failed to load visitor data",
+        );
       });
 
     return () => {
@@ -225,7 +235,9 @@ export default function DashboardPage() {
                         <Button
                           variant="outline"
                           size="sm"
-                          onClick={() => setExpandedIp(expandedIp === row.ip ? null : row.ip)}
+                          onClick={() =>
+                            setExpandedIp(expandedIp === row.ip ? null : row.ip)
+                          }
                         >
                           {expandedIp === row.ip ? "Hide" : "Details"}
                         </Button>

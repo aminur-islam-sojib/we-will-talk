@@ -15,7 +15,8 @@ export async function GET() {
   } catch (error) {
     return NextResponse.json(
       {
-        error: error instanceof Error ? error.message : "Failed to load visitors",
+        error:
+          error instanceof Error ? error.message : "Failed to load visitors",
       },
       { status: 500 },
     );
