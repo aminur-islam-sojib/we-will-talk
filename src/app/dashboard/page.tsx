@@ -58,17 +58,9 @@ export default function DashboardPage() {
   const [dbError, setDbError] = useState<string | null>(null);
   const [expandedIp, setExpandedIp] = useState<string | null>(null);
   const [markedIps, setMarkedIps] = useState<string[]>([]);
+  const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
-    const storedMarks = window.localStorage.getItem("markedIps");
-    if (storedMarks) {
-      try {
-        setMarkedIps(JSON.parse(storedMarks));
-      } catch {
-        setMarkedIps([]);
-      }
-    }
-
     let active = true;
 
     void fetch("/api/visitors")
@@ -78,7 +70,9 @@ export default function DashboardPage() {
         if (!active) return;
 
         const records = (data.visitors ?? []) as Array<Record<string, unknown>>;
+        const trackedIps = (data.trackedIps ?? []) as string[];
         setVisitors(records);
+        setMarkedIps(trackedIps);
 
         const grouped = new Map<
           string,
@@ -144,14 +138,30 @@ export default function DashboardPage() {
     });
   }, [expandedIp, visitors]);
 
-  const toggleMarkedIp = (ip: string) => {
-    setMarkedIps((current) => {
-      const next = current.includes(ip)
-        ? current.filter((item) => item !== ip)
-        : [...current, ip];
-      window.localStorage.setItem("markedIps", JSON.stringify(next));
-      return next;
-    });
+  const toggleMarkedIp = async (ip: string) => {
+    if (isSaving) return;
+
+    setIsSaving(true);
+    try {
+      const response = await fetch("/api/visitors", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ip }),
+      });
+
+      if (!response.ok) throw new Error("Failed to update tracked IP");
+      const data = await response.json();
+
+      if (data.marked) {
+        setMarkedIps((current) => [...current, ip]);
+      } else {
+        setMarkedIps((current) => current.filter((item) => item !== ip));
+      }
+    } catch {
+      setDbError("Failed to update tracked IP");
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   return (
@@ -277,7 +287,8 @@ export default function DashboardPage() {
                               markedIps.includes(row.ip) ? "default" : "outline"
                             }
                             size="sm"
-                            onClick={() => toggleMarkedIp(row.ip)}
+                            disabled={isSaving}
+                            onClick={() => void toggleMarkedIp(row.ip)}
                           >
                             {markedIps.includes(row.ip) ? "Marked" : "Mark"}
                           </Button>
