@@ -57,8 +57,18 @@ export default function DashboardPage() {
   >([]);
   const [dbError, setDbError] = useState<string | null>(null);
   const [expandedIp, setExpandedIp] = useState<string | null>(null);
+  const [markedIps, setMarkedIps] = useState<string[]>([]);
 
   useEffect(() => {
+    const storedMarks = window.localStorage.getItem("markedIps");
+    if (storedMarks) {
+      try {
+        setMarkedIps(JSON.parse(storedMarks));
+      } catch {
+        setMarkedIps([]);
+      }
+    }
+
     let active = true;
 
     void fetch("/api/visitors")
@@ -125,6 +135,16 @@ export default function DashboardPage() {
       return ip === expandedIp;
     });
   }, [expandedIp, visitors]);
+
+  const toggleMarkedIp = (ip: string) => {
+    setMarkedIps((current) => {
+      const next = current.includes(ip)
+        ? current.filter((item) => item !== ip)
+        : [...current, ip];
+      window.localStorage.setItem("markedIps", JSON.stringify(next));
+      return next;
+    });
+  };
 
   return (
     <main className="min-h-screen bg-background p-6 text-foreground">
@@ -232,15 +252,28 @@ export default function DashboardPage() {
                         {row.url || "—"}
                       </TableCell>
                       <TableCell>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() =>
-                            setExpandedIp(expandedIp === row.ip ? null : row.ip)
-                          }
-                        >
-                          {expandedIp === row.ip ? "Hide" : "Details"}
-                        </Button>
+                        <div className="flex flex-wrap gap-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() =>
+                              setExpandedIp(
+                                expandedIp === row.ip ? null : row.ip,
+                              )
+                            }
+                          >
+                            {expandedIp === row.ip ? "Hide" : "Details"}
+                          </Button>
+                          <Button
+                            variant={
+                              markedIps.includes(row.ip) ? "default" : "outline"
+                            }
+                            size="sm"
+                            onClick={() => toggleMarkedIp(row.ip)}
+                          >
+                            {markedIps.includes(row.ip) ? "Marked" : "Mark"}
+                          </Button>
+                        </div>
                       </TableCell>
                     </TableRow>
                     {expandedIp === row.ip && matchingVisits.length > 0 ? (
