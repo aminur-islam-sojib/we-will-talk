@@ -37,6 +37,15 @@ export async function POST(request: NextRequest) {
       ...networkData,
       ...clientData,
       receivedAt: new Date().toISOString(),
+      timestamp: new Date().toISOString(),
+      visitedAt: new Date().toISOString(),
+      date: new Date().toISOString().slice(0, 10),
+      time: new Date().toTimeString().split(" ")[0],
+      hour: new Date().getHours(),
+      minute: new Date().getMinutes(),
+      second: new Date().getSeconds(),
+      millisecond: new Date().getMilliseconds(),
+      timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || null,
     };
 
     const db = await getDb();
