@@ -111,7 +111,15 @@ export default function DashboardPage() {
               latestVisit: data.latestVisit,
               url: data.url,
             }))
-            .sort((a, b) => b.count - a.count),
+            .sort((a, b) => {
+              const timeA = a.latestVisit
+                ? new Date(a.latestVisit).getTime()
+                : 0;
+              const timeB = b.latestVisit
+                ? new Date(b.latestVisit).getTime()
+                : 0;
+              return timeB - timeA || b.count - a.count;
+            }),
         );
       })
       .catch((error) => {
